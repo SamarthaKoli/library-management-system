@@ -1,55 +1,100 @@
 package com.example.library_management.service;
 
 import com.example.library_management.model.Book;
-import jakarta.annotation.PostConstruct;
-import java.util.ArrayList;
+import com.example.library_management.repository.BookRepository;
 import java.util.List;
+import java.util.Optional;
 import org.springframework.stereotype.Service;
 
 /**
- * This service class stores and manages all books using in-memory ArrayList storage.
+ * This service class stores and manages books using Spring Data JPA.
  */
 @Service
 public class LibraryService {
 
-	private final List<Book> books = new ArrayList<>();
-	private int nextId = 1;
+	private final BookRepository bookRepository;
 
 	/**
-	 * This method adds five sample books when the application starts.
+	 * This constructor injects the book repository.
+	 *
+	 * @param bookRepository the book repository
 	 */
-	@PostConstruct
-	public void initializeSampleBooks() {
-		addBook(new Book(0, "Java Programming", "Sample Author 1", false));
-		addBook(new Book(0, "Python Basics", "Sample Author 2", false));
-		addBook(new Book(0, "Data Structures", "Sample Author 3", false));
-		addBook(new Book(0, "Spring Boot Guide", "Sample Author 4", false));
-		addBook(new Book(0, "Computer Networks", "Sample Author 5", false));
+	public LibraryService(BookRepository bookRepository) {
+		this.bookRepository = bookRepository;
 	}
 
 	/**
-	 * This method adds a new book to the in-memory list.
+	 * This method adds a new book to the database.
 	 *
 	 * @param book the book to be added
 	 * @return the added book with generated id
 	 */
 	public Book addBook(Book book) {
-		Book newBook = new Book();
-		newBook.setId(nextId++);
-		newBook.setTitle(book.getTitle());
-		newBook.setAuthor(book.getAuthor());
-		newBook.setIssued(false);
-		books.add(newBook);
-		return newBook;
+		book.setIssued(false);
+		return bookRepository.save(book);
 	}
 
 	/**
-	 * This method returns all books in the library.
+	 * This method returns all books in the database.
 	 *
 	 * @return the list of books
 	 */
 	public List<Book> getAllBooks() {
-		return books;
+		return bookRepository.findAll();
+	}
+
+	/**
+	 * This method returns the total number of books in the database.
+	 *
+	 * @return the total book count
+	 */
+	public long getTotalBooks() {
+		return bookRepository.count();
+	}
+
+	/**
+	 * This method returns the number of available books in the database.
+	 *
+	 * @return the available book count
+	 */
+	public long getAvailableBooks() {
+		return bookRepository.countByIssuedFalse();
+	}
+
+	/**
+	 * This method returns the number of issued books in the database.
+	 *
+	 * @return the issued book count
+	 */
+	public long getIssuedBooks() {
+		return bookRepository.countByIssuedTrue();
+	}
+
+	/**
+	 * Backward-compatible alias for total books.
+	 *
+	 * @return the total book count
+	 */
+	public long getTotalBooksCount() {
+		return getTotalBooks();
+	}
+
+	/**
+	 * Backward-compatible alias for available books.
+	 *
+	 * @return the available book count
+	 */
+	public long getAvailableBooksCount() {
+		return getAvailableBooks();
+	}
+
+	/**
+	 * Backward-compatible alias for issued books.
+	 *
+	 * @return the issued book count
+	 */
+	public long getIssuedBooksCount() {
+		return getIssuedBooks();
 	}
 
 	/**
@@ -59,12 +104,7 @@ public class LibraryService {
 	 * @return the matching book, or null if not found
 	 */
 	public Book getBookById(int id) {
-		for (Book book : books) {
-			if (book.getId() == id) {
-				return book;
-			}
-		}
-		return null;
+		return bookRepository.findById((long) id).orElse(null);
 	}
 
 	/**
@@ -74,9 +114,9 @@ public class LibraryService {
 	 * @return true if the book was removed, otherwise false
 	 */
 	public boolean removeBookById(int id) {
-		Book book = getBookById(id);
-		if (book != null) {
-			books.remove(book);
+		Optional<Book> bookOptional = bookRepository.findById((long) id);
+		if (bookOptional.isPresent()) {
+			bookRepository.delete(bookOptional.get());
 			return true;
 		}
 		return false;
@@ -89,14 +129,16 @@ public class LibraryService {
 	 * @return 1 if issued successfully, 0 if not found, -1 if already issued
 	 */
 	public int issueBookById(int id) {
-		Book book = getBookById(id);
-		if (book == null) {
+		Optional<Book> bookOptional = bookRepository.findById((long) id);
+		if (bookOptional.isEmpty()) {
 			return 0;
 		}
+		Book book = bookOptional.get();
 		if (book.isIssued()) {
 			return -1;
 		}
 		book.setIssued(true);
+		bookRepository.save(book);
 		return 1;
 	}
 
@@ -107,14 +149,16 @@ public class LibraryService {
 	 * @return 1 if returned successfully, 0 if not found, -1 if it was not issued
 	 */
 	public int returnBookById(int id) {
-		Book book = getBookById(id);
-		if (book == null) {
+		Optional<Book> bookOptional = bookRepository.findById((long) id);
+		if (bookOptional.isEmpty()) {
 			return 0;
 		}
+		Book book = bookOptional.get();
 		if (!book.isIssued()) {
 			return -1;
 		}
 		book.setIssued(false);
+		bookRepository.save(book);
 		return 1;
 	}
 
@@ -125,15 +169,7 @@ public class LibraryService {
 	 * @return the matching books
 	 */
 	public List<Book> searchBooksByTitle(String title) {
-		List<Book> matchedBooks = new ArrayList<>();
-		String searchText = title == null ? "" : title.toLowerCase();
-
-		for (Book book : books) {
-			if (book.getTitle() != null && book.getTitle().toLowerCase().contains(searchText)) {
-				matchedBooks.add(book);
-			}
-		}
-
-		return matchedBooks;
+		String searchText = title == null ? "" : title;
+		return bookRepository.findByTitleContainingIgnoreCase(searchText);
 	}
 }

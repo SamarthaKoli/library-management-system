@@ -1,11 +1,21 @@
 package com.example.library_management.model;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+
 /**
  * This class represents a book in the library management system.
  */
+@Entity
+@Table(name = "books")
 public class Book {
 
-	private int id;
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Long id;
 	private String title;
 	private String author;
 	private boolean issued;
@@ -24,7 +34,7 @@ public class Book {
 	 * @param author the book author
 	 * @param issued the issued status of the book
 	 */
-	public Book(int id, String title, String author, boolean issued) {
+	public Book(Long id, String title, String author, boolean issued) {
 		this.id = id;
 		this.title = title;
 		this.author = author;
@@ -36,7 +46,7 @@ public class Book {
 	 *
 	 * @return the book id
 	 */
-	public int getId() {
+	public Long getId() {
 		return id;
 	}
 
@@ -45,7 +55,7 @@ public class Book {
 	 *
 	 * @param id the book id
 	 */
-	public void setId(int id) {
+	public void setId(Long id) {
 		this.id = id;
 	}
 

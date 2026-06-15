@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Add Book</title>
+	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+	<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+	<style>
+		body {
+			min-height: 100vh;
+			background: linear-gradient(180deg, #f8fafc 0%, #eef2f7 100%);
+		}
+
+		.navbar {
+			background: rgba(15, 23, 42, 0.95) !important;
+			backdrop-filter: blur(14px);
+		}
+
+		.hero {
+			background: linear-gradient(135deg, #0f172a, #1e293b);
+			color: #fff;
+			border-radius: 1.5rem;
+			box-shadow: 0 24px 60px rgba(15, 23, 42, 0.18);
+		}
+
+		.card {
+			border: 0;
+			border-radius: 1.25rem;
+			box-shadow: 0 18px 40px rgba(15, 23, 42, 0.08);
+		}
+
+		.form-control {
+			border-radius: 0.9rem;
+			padding: 0.9rem 1rem;
+		}
+
+		.btn-action {
+			border-radius: 0.9rem;
+			padding: 0.85rem 1.2rem;
+			font-weight: 600;
+		}
+	</style>
+</head>
+<body>
+	<nav class="navbar navbar-expand-lg navbar-dark sticky-top shadow-sm">
+		<div class="container py-2">
+			<a class="navbar-brand fw-semibold d-flex align-items-center gap-2" href="/">
+				<i class="bi bi-book-half fs-4"></i>
+				<span>Library Management System</span>
+			</a>
+		</div>
+	</nav>
+
+	<main class="container py-5">
+		<section class="hero p-4 p-md-5 mb-4">
+			<div class="row align-items-center g-4">
+				<div class="col-lg-8">
+					<div class="text-uppercase small fw-semibold text-white-50 mb-2">Catalog management</div>
+					<h1 class="display-6 fw-bold mb-3">Add a New Book</h1>
+					<p class="lead text-white-50 mb-0">Enter the book details below and save it to the library catalog.</p>
+				</div>
+				<div class="col-lg-4 text-lg-end">
+					<a href="/books-ui" class="btn btn-outline-light btn-action">
+						<i class="bi bi-arrow-left me-2"></i>Back to Books
+					</a>
+				</div>
+			</div>
+		</section>
+
+		<section class="card">
+			<div class="card-body p-4 p-md-5">
+				<form th:action="@{/add-book}" th:object="${book}" method="post" class="row g-4">
+					<div class="col-md-6">
+						<label for="title" class="form-label fw-semibold">Title</label>
+						<input type="text" id="title" th:field="*{title}" class="form-control" placeholder="Enter book title" required>
+					</div>
+					<div class="col-md-6">
+						<label for="author" class="form-label fw-semibold">Author</label>
+						<input type="text" id="author" th:field="*{author}" class="form-control" placeholder="Enter author name" required>
+					</div>
+					<div class="col-12 d-flex flex-column flex-sm-row gap-3 pt-2">
+						<button type="submit" class="btn btn-success btn-action">
+							<i class="bi bi-save me-2"></i>Save Book
+						</button>
+						<a href="/books-ui" class="btn btn-outline-secondary btn-action">Cancel</a>
+					</div>
+				</form>
+			</div>
+		</section>
+	</main>
+
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
